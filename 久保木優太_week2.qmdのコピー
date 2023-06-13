@@ -1,0 +1,327 @@
+---
+title: "第1課題　電子回路1-b 論理回路"
+author: "久保木優太"
+date:   2023/4/20 #レポート作成日の日付が入る。実験日と異なる場合には実験日を直接記入する。
+format: pdf
+fig-pos: 'ht' 
+tbl-pos: 'ht'  #デフォルト出力形式を指定。右上の"Render"メニューでHTML, PDF, DOCXを選択して指定することも出来る。ここを revealjs, beamer, pptx の何れかとするとプレゼンテーションファイルが作成出来る。
+lang: ja #図表の表示を Figure -> 図、Table -> 表　などと日本語に変更する。
+number-sections: true
+#code-fold: true #ソースコードを折りたたみ表示 (HTML形式の場合)
+echo: false #ソースコードを表示しない (pdf形式の場合はこちらがベター)
+pdf-engine: lualatex #pdf出力の際の設定
+documentclass: ltjsarticle #pdf出力の際の設定
+---
+
+# 実験1 : NAND回路の特性
+<!-- 実験課題の概要を記述 -->
+NAND回路であるIC7400を用いて、　入力電圧を変えた時の出力電圧を調べる。
+
+## 実験方法
+<!-- 実験の手順を記述 -->
++5Vの電圧に、10k $\Omega$ の可変抵抗を取り付け、その先にICを接続する。二つの入力には同じ電圧が加わることとなる。可変抵抗の抵抗の値を変えて行った時の出力電圧を測定する。
+
+可変抵抗器を $R$[$\Omega$]に設定した時、入力電圧 $V_A, V_B$ は、
+$$ V_{A} =V_{B} = 5\cdot \frac{R}{10} $$
+によって求まる。
+
+## 結果
+<!-- 実験データを図・表に表示し、結果の概要を言葉で記述。 -->
+
+測定結果を @fig-1 に示す。
+
+```{python}
+#| label: fig-1
+#| fig-cap: NAND回路の特性
+
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.axisartist.axislines import SubplotZero
+
+V_a = [0, 1.116, 1.484, 1.586, 1.904, 2.698, 3.376, 4.06, 4.471, 5.10]
+V_b = [5.25, 5.20, 0.000784, 0.000847, 0.000836, 0.000835, 0.000835, 0.000835, 0.000835, 0.000835]
+fig = plt.figure(figsize=(6, 4))
+ax = SubplotZero(fig, 111)
+fig.add_subplot(ax)
+for direction in ["right", "top"]:
+    # hides borders
+    ax.axis[direction].set_visible(False)    
+for direction in ["left",  "bottom"]:
+    #arrow axes
+    ax.axis[direction].set_axisline_style("->")
+
+x = np.linspace(0, 10., 100)
+ax.plot(V_a, V_b)
+ax.set_xlabel('V_in')
+ax.set_ylabel('V_out')
+plt.show()
+```
+
+
+
+
+
+
+## 考察 
+<!-- 得られた結果を踏まえ、実験結果に考察を加える。 -->
+NAND回路は @tbl-1 の特性を持つ。
+
+これと @fig-1 の結果より、入力のLow,Highは閾値1.5V程度であることが読み取れる。
+
+| A | B | X 
+|---|---|--- 
+| 0 | 0 | 0 
+| 0 | 1 | 0 
+| 1 | 0 | 0 
+| 1 | 1 | 1
+
+: NAND回路の性質 {#tbl-1}
+
+# 実験2 : OR回路の作成
+IC7400のNAND回路を組み合わせ、OR回路を作成し、動作を確認する。
+
+## 実験方法
+OR回路は @fig-2 のように回路を組んだ。
+
+![OR回路](week2_imageA.pdf){width=50% #fig-2}
+
+
+## 結果
+計測の結果を @tbl-orr に示す。
+これは、OR回路の特性と一致しており、NAND回路を組み合わせることでOR回路の機能を実現できたと言える。
+
+| A | B | X 
+|---|---|--- 
+| 0 | 0 | 0 
+| 0 | 1 | 1 
+| 1 | 0 | 1 
+| 1 | 1 | 1
+
+: IC7400を用いたOR回路 {#tbl-orr}
+
+
+# 実験3 : ExOR回路の作成
+IC7400のNAND回路を組み合わせることで、ExOR回路を作成し、動作を確認する。
+
+## 実験方法
+OR回路は @fig-3 のように回路を組んだ。
+
+![ExOR回路](week2_imageB.pdf){width=50% #fig-3}
+
+
+## 結果
+計測の結果を @tbl-exor に示す。
+これは、OR回路の特性と一致しており、ExOR回路を組み合わせることでExOR回路の機能を実現できたと言える。
+また、NAND回路は完全性を備えており、NAND回路だけを用いてどんなどんな基本的論理回路も作ることができることが分かっている。
+
+| A | B | X 
+|---|---|--- 
+| 0 | 0 | 0 
+| 0 | 1 | 1 
+| 1 | 0 | 1 
+| 1 | 1 | 0
+
+: IC7400を用いたOR回路 {#tbl-exor}
+
+# 実験4 : Flip-Folp回路の動作
+$R$ と $S$ の2入力を持つRS-Flip-Flopを作成する。
+
+## 実験方法
+IC7400のNAND回路を二つ組み合わせてFlip-Flpp回路を作成する。これは、一方のNAND回路の出力をもう一方のNAND回路の入力に繋げることで実現できる。作成したFlip-Flop回路の二つの入力 $R$,$S$ のどちらかにアースを接続した時、出力電圧 $Q$,$\bar Q$ がどのような振る舞いをするか測定する。入力端子は、アースに接続していない時、Highになることに注意する。
+
+## 結果
+@fig-2 に入力 $P$,$Q$ を変化させたときの出力 $Q$,$\bar Q$ タイミングチャートを示す。
+```{python}
+#| label: fig-2
+#| fig-cap: Flip-Flop回路の特性
+
+R = [1,1,1,0,1,0,1]; R = [R[0]]+R # 各データ列の先頭データを 2 回繰り返して入力 
+S = [1,0,1,1,1,1,1]; S = [S[0]]+S
+Q = [1,0,0,1,1,1,1]; Q = [Q[0]]+Q
+notQ = [0,1,1,0,0,0,0]; notQ = [notQ[0]]+notQ
+X = np.arange(0,len(R))
+fig = plt.figure()
+pr = fig.add_subplot(4, 1, 1)
+ps = fig.add_subplot(4, 1, 2)
+pq = fig.add_subplot(4, 1, 3)
+pqn = fig.add_subplot(4, 1, 4)
+
+pr.plot(X,R,drawstyle='steps')
+ps.plot(X,S,drawstyle='steps')
+pq.plot(X,Q,drawstyle='steps')
+pqn.plot(X,notQ,drawstyle='steps')
+
+pr.spines['right'].set_visible(False) # 右枠非表示 
+ps.spines['right'].set_visible(False) 
+pq.spines['right'].set_visible(False) # 右枠非表示 
+pqn.spines['right'].set_visible(False) 
+
+pr.spines['top'].set_visible(False) # 上枠非表示 
+ps.spines['top'].set_visible(False) 
+pq.spines['top'].set_visible(False) # 上枠非表示 
+pqn.spines['top'].set_visible(False) 
+
+pr.spines['bottom'].set_visible(False) # 下枠非表示 
+ps.spines['bottom'].set_visible(False)
+pq.spines['bottom'].set_visible(False) # 下枠非表示 
+pqn.spines['bottom'].set_visible(False)
+
+pr.set_yticks([0,1],['L','H']) #縦軸目盛りのラベルを指定 
+ps.set_yticks([0,1],['L','H'])
+pq.set_yticks([0,1],['L','H']) #縦軸目盛りのラベルを指定 
+pqn.set_yticks([0,1],['L','H'])
+
+pr.set_xticklabels([]) #横軸目盛りのラベルを非表示 
+ps.set_xticklabels([])
+pq.set_xticklabels([]) #横軸目盛りのラベルを非表示 
+pqn.set_xticklabels([])
+
+pr.set_xticks(np.arange(0,len(R))) #横軸のグリッド線を 1 ステップずつに指定 
+ps.set_xticks(np.arange(0,len(R)))
+pq.set_xticks(np.arange(0,len(R))) #横軸のグリッド線を 1 ステップずつに指定 
+pqn.set_xticks(np.arange(0,len(R)))
+
+pr.grid(linestyle='dotted') # グリッド線表示
+ps.grid(linestyle='dotted')
+pq.grid(linestyle='dotted') # グリッド線表示
+pqn.grid(linestyle='dotted')
+
+pr.set_ylabel("R")
+ps.set_ylabel("S")
+pq.set_ylabel("Q")
+pqn.set_ylabel("not Q")
+fig.subplots_adjust(hspace=0.1) # 上下のグラフをつなげて表示 plt.show()
+```
+
+## 考察
+どの時点でも、$R$,$S$,$Q$, $\bar Q$ の状態はNAND回路の特性 @tbl-orr に従っていることが分かる。Flip-Flopの特性として、スイッチのように一度一方の入力をアースに接続した後は、アースから離しても状態が維持される、ということが分かった。同時に、この回路の出力は二つの入力の組み合わせのみによって決まるのではなく、前の状態に影響されていると言える。
+
+初期段階では入力 $R$,$S$ はHighであり、もう二つの入力 $Q$,$\bar Q$ は不定である。$Q$=High, $\bar Q$ = Low となっても、$Q$=Low, $\bar Q$ = High となっても成立するはずだが、本実験ではいつも初期段階は $Q$=High, $\bar Q$ = Low になった。何の要因で $Q,$$\bar Q$ が決定したのかは分からなかった。
+
+# 実験5 : 分周回路
+ファンクションジェネレータから電位差5Vの短形波を入力として、IC7493を用いたT-Flip-Flopの動作を確認する。
+
+## 実験方法
+IC7493の $R_0$ をアースに接続し、$Q_A$ をINPUT Bに接続することで、4連のT-Flip-Flopを作成する。INPUT Aにはファンクションジェネレータにより電位差5Vの短形波を入力する。
+
+## 結果
+短波形の入力電圧CKに対して、$Q_A$,$Q_B$,$Q_C$,$Q_D$ の出力電圧を @fig-3 に表示する。
+```{python}
+#| label: fig-3
+#| fig-cap: 分周回路
+
+CK =[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]; CK = [CK[0]]+CK
+R = [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0]; R = [R[0]]+R # 各データ列の先頭データを 2 回繰り返して入力 
+S = [0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0]; S = [S[0]]+S
+Q = [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0]; Q = [Q[0]]+Q
+notQ = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0]; notQ = [notQ[0]]+notQ
+X = np.arange(0,len(R))
+fig = plt.figure()
+
+pc = fig.add_subplot(5, 1, 1)
+pr = fig.add_subplot(5, 1, 2)
+ps = fig.add_subplot(5, 1, 3)
+pq = fig.add_subplot(5, 1, 4)
+pqn = fig.add_subplot(5, 1, 5)
+
+pc.plot(X,CK,drawstyle='steps')
+pr.plot(X,R,drawstyle='steps')
+ps.plot(X,S,drawstyle='steps')
+pq.plot(X,Q,drawstyle='steps')
+pqn.plot(X,notQ,drawstyle='steps')
+
+pc.spines['right'].set_visible(False)
+pr.spines['right'].set_visible(False) # 右枠非表示 
+ps.spines['right'].set_visible(False) 
+pq.spines['right'].set_visible(False) # 右枠非表示 
+pqn.spines['right'].set_visible(False) 
+
+pc.spines['top'].set_visible(False)
+pr.spines['top'].set_visible(False) # 上枠非表示 
+ps.spines['top'].set_visible(False) 
+pq.spines['top'].set_visible(False) # 上枠非表示 
+pqn.spines['top'].set_visible(False) 
+
+pc.spines['bottom'].set_visible(False)
+pr.spines['bottom'].set_visible(False) # 下枠非表示 
+ps.spines['bottom'].set_visible(False)
+pq.spines['bottom'].set_visible(False) # 下枠非表示 
+pqn.spines['bottom'].set_visible(False)
+
+pc.set_yticks([0,1],['L','H'])
+pr.set_yticks([0,1],['L','H']) #縦軸目盛りのラベルを指定 
+ps.set_yticks([0,1],['L','H'])
+pq.set_yticks([0,1],['L','H']) #縦軸目盛りのラベルを指定 
+pqn.set_yticks([0,1],['L','H'])
+
+pc.set_xticklabels([])
+pr.set_xticklabels([]) #横軸目盛りのラベルを非表示 
+ps.set_xticklabels([])
+pq.set_xticklabels([]) #横軸目盛りのラベルを非表示 
+pqn.set_xticklabels([])
+
+pc.set_xticks(np.arange(0,len(R)))
+pr.set_xticks(np.arange(0,len(R))) #横軸のグリッド線を 1 ステップずつに指定 
+ps.set_xticks(np.arange(0,len(R)))
+pq.set_xticks(np.arange(0,len(R))) #横軸のグリッド線を 1 ステップずつに指定 
+pqn.set_xticks(np.arange(0,len(R)))
+
+pc.grid(linestyle='dotted')
+pr.grid(linestyle='dotted') # グリッド線表示
+ps.grid(linestyle='dotted')
+pq.grid(linestyle='dotted') # グリッド線表示
+pqn.grid(linestyle='dotted')
+
+pc.set_ylabel("CK")
+pr.set_ylabel("Q_A")
+ps.set_ylabel("Q_B")
+pq.set_ylabel("Q_C")
+pqn.set_ylabel("Q_D")
+fig.subplots_adjust(hspace=0.1) # 上下のグラフをつなげて表示 plt.show()
+```
+
+## 考察
+$Q_A$,$Q_B$,$Q_C$,$Q_D$ はそれぞれ入力電圧の周期の2倍の周期の電圧を出力していることが分かる。よって、4連のT-Flip-Flopは2分周回路、4分周回路、8分周回路、16分周回路として機能している。
+
+また、出力電圧のHigh,Lowの切り替わりは、入力電圧がHighからLowに切り替わるときであることも @fig-3 から読み取れた。
+
+
+
+
+# 実験6 : 加算回路
+IC7482, IC7483の加算回路の動作を確認する。
+
+## 実験方法
+IC7482については $C_0$,$C_2$,$\Sigma_1$,$\Sigma_2$ が、IC7483については $C_0$,$C_4$,$\Sigma_1$,$\Sigma_2$,$\Sigma_3$,$\Sigma_4$ が足し算の結果を表す出力である。これらの出力端子には発光ダイオードの-端子を接続し、+端子には+5Vを接続することで、HighかLowかを目視できるようにする。
+
+## 結果
+どちらのICについても2進数の足し算の論理的な結果と同様の結果を返した。具体的に試した計算は以下の通りである。
+
+- IC7482
+$$C_0 + A + B = X$$
+$$0 + 10_{(2)} + 01_{(2)} = 011_{(2)}$$
+$$1 + 11_{(2)} + 11_{(2)} = 111_{(2)}$$
+- IC7483
+$$C_0 + A + B = X$$
+$$0 + 1001_{(2)} + 1101_{(2)} = 10110_{(2)}$$
+
+
+## 考察
+どちらのICについても、桁の繰り上がりを含め全ての計算が問題なく為されており、通常の2進数の計算の振る舞いをしている。ただし、$C_0$ の入力だけは、通常の計算では用いない不要な入力であるように見える。おそらくこれは、複数の加算回路を組み合わせるために設計されているのではないだろうか。例えば、IC7482の $C_2$ をIC7483の $C_0$ に接続することで、6ビットの足し算回路を作成することができる。
+
+また、内部的には二種類のICの、全てのビット計算について、同じ処理がなされていると考えられる。まず、各ビットの足し算には、出力端子としては現れないが、繰り上がりがあるかどうかを示す論理回路 $C_i$ が計算されていると考えられる。そして入力の、$C_{i-1}$,$A_{i}$,$C_{B}$と出力の、$C_{i}$,$\Sigma_{i}$ の関係は @tbl-lad となる。$C_{i}$ と $\Sigma_{i}$ は以下二つの異なる論理式、論理回路によって作成されていると考えられる。
+$$C_{i} = (A_i\oplus B_i) \oplus C_{i-1}$$
+$$\Sigma_{i}　= (A_i \oplus B_i)\oplus C_{i-1} + A_i \cdot B_i$$
+
+| $C_{i-1}$ | $A_{i}$ |$C_{B}$|| $C_{i}$| $\Sigma_{i}$
+|---|---|---|---|---|---
+| 0 | 0 | 0 || 0 | 0
+| 0 | 0 | 1 || 0 | 1
+| 0 | 1 | 0 || 0 | 1
+| 0 | 1 | 1 || 1 | 0
+| 1 | 0 | 0 || 0 | 1
+| 1 | 0 | 1 || 1 | 0
+| 1 | 1 | 0 || 1 | 0
+| 1 | 1 | 1 || 1 | 1
+
+: NAND回路の性質 {#tbl-lad}
